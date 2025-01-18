@@ -13,20 +13,57 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+ 
+  conversations Conversation[]
+  accounts Account[]
+    sessions      Session[]  
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  sentiment String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  replies   Reply[]
+}
+
+model Reply {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  content        String
+  mood           String?
+  isSelected     Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -45,37 +82,4 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-}
-
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime? @map("email_verified")
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  conversations Conversation[]
-  @@map("users")
-}
-
-model Conversation{
-  id String @id @default(cuid())
-  userId String
-  user User @relation(fields: [userId], references: [id])
-  message Message[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-}
-
-model Message{
-  id String @id @default(cuid())
-  conversationId String
-  conversation Conversation @relation(fields: [conversationId], references: [id])
-  text String
-   createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
 }
