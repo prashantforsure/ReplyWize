@@ -52,3 +52,55 @@ export async function POST(request: Request){
         })
     }
 }
+
+export async function PUT(request: Request){
+    try{
+        const body = await request.json();
+        const { id, content, sentiment} = body
+
+        const updatedConversation = await prisma.conversation.update({
+            where: { id },
+            data: {
+                content, sentiment
+            }
+        })
+        return NextResponse.json(updatedConversation, {
+            status: 200
+        })
+    }catch(error){
+        console.log('internal server error', error);
+        return NextResponse.json({
+            error: "internal server error"
+        },{
+            status: 500
+        })
+    }
+}
+
+export async function DELETE(request: Request){
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id');
+
+    if(!id){
+        return NextResponse.json({
+            error: "conversation id is required"
+        }, {
+            status: 400
+        })
+    }
+    try{
+        await prisma.conversation.delete({
+            where: {
+                id
+            },
+        })
+        return NextResponse.json({ message: 'Conversation deleted successfully' });
+    }catch(error){
+        console.error('error deleting conversation', error);
+        return NextResponse.json({
+            error: "internal server error"
+        }, {
+            status: 500
+        })
+    }
+}
