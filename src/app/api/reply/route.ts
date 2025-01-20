@@ -2,17 +2,15 @@ import { authoptions } from "@/lib/auth/auth";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { generateAIReply } from "@/lib/ai-utils"
 
-async function generateAIReply(conversationContent: string): Promise<string> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return "";
-  }
-  
 
 export async function GET(request : Request){
 const session = await getServerSession(authoptions)
 if(!session?.user?.id){
-return NextResponse
+return NextResponse.json({
+    message: "unauth"
+}, {status:500})
 }
 
     const { searchParams } = new URL(request.url);
@@ -42,6 +40,12 @@ return NextResponse
 }
 
 export async function POST(request: Request){
+    const session = await getServerSession(authoptions)
+if(!session?.user?.id){
+return NextResponse.json({
+    message: "unauth"
+}, {status:500})
+}
     try{
     const body = await request.json();
 const { conversationId, content } =  body; 
@@ -89,6 +93,12 @@ return NextResponse.json({
 }
 
 export async function PUT(request: Request){
+    const session = await getServerSession(authoptions)
+if(!session?.user?.id){
+return NextResponse.json({
+    message: "unauth"
+}, {status:500})
+}
 try{
     const body = await request.json()
     const { mood, content, id, isSelected } = body;
@@ -112,6 +122,12 @@ try{
 }}
 
 export async function DELETE(request: Request) {
+    const session = await getServerSession(authoptions)
+if(!session?.user?.id){
+return NextResponse.json({
+    message: "unauth"
+}, {status:500})
+}
     try {
         const { searchParams } = new URL(request.url);
     const id = searchParams.get('conversationId');

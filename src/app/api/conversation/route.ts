@@ -1,7 +1,17 @@
+import { authoptions } from "@/lib/auth/auth";
 import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request){
+    
+    const session = await getServerSession(authoptions)
+    if(!session?.user?.id){
+    return NextResponse.json({
+        message: "unauth"
+    }, {status:500})
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -31,6 +41,13 @@ export async function GET(request: Request){
 }
 
 export async function POST(request: Request){
+    const session = await getServerSession(authoptions)
+if(!session?.user?.id){
+return NextResponse.json({
+    message: "unauth"
+}, {status:500})
+}
+
     try{
         const body = await request.json();
         const { userId, content, sentiment } = body;
@@ -54,6 +71,13 @@ export async function POST(request: Request){
 }
 
 export async function PUT(request: Request){
+    const session = await getServerSession(authoptions)
+if(!session?.user?.id){
+return NextResponse.json({
+    message: "unauth"
+}, {status:500})
+}
+
     try{
         const body = await request.json();
         const { id, content, sentiment} = body
@@ -78,6 +102,13 @@ export async function PUT(request: Request){
 }
 
 export async function DELETE(request: Request){
+    const session = await getServerSession(authoptions)
+    if(!session?.user?.id){
+    return NextResponse.json({
+        message: "unauth"
+    }, {status:500})
+    }
+    
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id');
 
