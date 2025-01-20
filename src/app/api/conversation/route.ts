@@ -18,6 +18,7 @@ export async function GET(request: Request){
                 status: 500
             })
         }
+        return NextResponse.json(conversation);
        }
        
     } catch(error){
@@ -27,4 +28,27 @@ export async function GET(request: Request){
         })
     }
     
+}
+
+export async function POST(request: Request){
+    try{
+        const body = await request.json();
+        const { userId, content, sentiment } = body;
+
+        const newConversation = await prisma.conversation.create({
+            data: {
+                userId,
+                content,
+                sentiment
+            }
+        })
+        return NextResponse.json(newConversation, {status: 201})
+    }catch(error){
+        console.log('error creating conversation', error)
+        return NextResponse.json({
+            error: 'internal server error'
+        }, {
+            status: 500
+        })
+    }
 }
